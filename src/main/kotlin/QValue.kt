@@ -12,34 +12,34 @@ import java.util.regex.Pattern
  * foo;q=0.1,bar;q=0.5,baz;q=1.0
  * ```
  */
-data class QItem(val name: String, val quality: Float = 1.0f) {
+data class QValue(val name: String, val quality: Float = 1.0f) {
   companion object {
     /**
      * To find each element in the list.
      */
-    private val ITEM_PATTERN =
+    private val VALUE_PATTERN =
         Pattern.compile("([a-zA-Z]+|\\*)(?:[;]q=(\\d+(?:\\.\\d+)?))?")
     /**
      * To validate the list format.
      */
     private val LIST_PATTERN =
-        Pattern.compile("${ITEM_PATTERN.pattern()}(?:\\s*,\\s*${ITEM_PATTERN.pattern()})*")
+        Pattern.compile("${VALUE_PATTERN.pattern()}(?:\\s*,\\s*${VALUE_PATTERN.pattern()})*")
 
     /**
      * Parse a quality list (qlist) to individual quality items. If the list cannot be parsed
      * an empty list is returned.
      */
-    fun parse(value: String?): List<QItem> {
+    fun decode(value: String?): List<QValue> {
       return value?.let { v ->
-        return mutableListOf<QItem>().apply {
+        return mutableListOf<QValue>().apply {
           if (LIST_PATTERN.matcher(v).matches()) {
-            val matcher = ITEM_PATTERN.matcher(v)
+            val matcher = VALUE_PATTERN.matcher(v)
             while (matcher.find()) {
               matcher.group(1)?.let { t ->
                 matcher.group(2)?.let { q ->
-                  add(QItem(t, q.toFloat()))
+                  add(QValue(t, q.toFloat()))
                 } ?: run {
-                  add(QItem(t))
+                  add(QValue(t))
                 }
               }
             }
@@ -52,4 +52,4 @@ data class QItem(val name: String, val quality: Float = 1.0f) {
   override fun toString(): String = "$name;q=$quality"
 }
 
-fun List<QItem>.encode(): String = this.joinToString(", ")
+fun List<QValue>.encode(): String = this.joinToString(", ")
